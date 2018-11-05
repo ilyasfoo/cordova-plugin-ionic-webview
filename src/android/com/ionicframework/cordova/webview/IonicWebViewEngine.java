@@ -140,6 +140,13 @@ public class IonicWebViewEngine extends SystemWebViewEngine {
               "window.WEBVIEW_SERVER_URL = '" + CDV_LOCAL_SERVER + "'" +
               "})()");
     }
+    
+    @Override
+    onLoadResource(WebView view, String url) {
+      Log.d(TAG, "Loading resource!: " + url);
+      super.onLoadResource(view, url);
+    }
+      
   }
 
   public void setServerBasePath(String path) {
