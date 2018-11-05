@@ -142,7 +142,7 @@ public class IonicWebViewEngine extends SystemWebViewEngine {
     }
     
     @Override
-    onLoadResource(WebView view, String url) {
+    public void onLoadResource(WebView view, String url) {
       Log.d(TAG, "Loading resource!: " + url);
       super.onLoadResource(view, url);
     }
