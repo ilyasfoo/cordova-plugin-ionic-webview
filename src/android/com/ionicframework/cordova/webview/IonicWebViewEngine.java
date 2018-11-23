@@ -24,6 +24,9 @@ import org.apache.cordova.PluginManager;
 import org.apache.cordova.engine.SystemWebViewClient;
 import org.apache.cordova.engine.SystemWebViewEngine;
 import org.apache.cordova.engine.SystemWebView;
+import org.json.JSONObject;
+import org.json.JSONException;
+import java.io.ByteArrayInputStream;
 
 public class IonicWebViewEngine extends SystemWebViewEngine {
   public static final String TAG = "IonicWebViewEngine";
@@ -32,6 +35,8 @@ public class IonicWebViewEngine extends SystemWebViewEngine {
   private String CDV_LOCAL_SERVER;
   private static final String LAST_BINARY_VERSION_CODE = "lastBinaryVersionCode";
   private static final String LAST_BINARY_VERSION_NAME = "lastBinaryVersionName";
+
+  public IonicWebView ionicWebView;
 
   /**
    * Used when created via reflection.
@@ -103,24 +108,78 @@ public class IonicWebViewEngine extends SystemWebViewEngine {
   private boolean isDeployDisabled() {
     return preferences.getBoolean("DisableDeploy", false);
   }
+
+  public void setIonicWebView(IonicWebView plugin) {
+    this.ionicWebView = plugin;
+  }
+
+  public void sendEvent(JSONObject _json) {
+    if (this.ionicWebView != null) {
+      this.ionicWebView.sendEvent(_json);
+    }
+  }
+
   private class ServerClient extends SystemWebViewClient {
     private ConfigXmlParser parser;
+    private IonicWebViewEngine engine;
 
     public ServerClient(SystemWebViewEngine parentEngine, ConfigXmlParser parser) {
       super(parentEngine);
+      this.engine = (IonicWebViewEngine)parentEngine;
       this.parser = parser;
+    }
+
+    public WebResourceResponse createEmptyResource() {
+        return new WebResourceResponse("text/plain", "utf-8", new ByteArrayInputStream("".getBytes()));
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+
+      if (request.getUrl().toString().toLowerCase().contains("clear/sessions")) {
+        return createEmptyResource();
+      }
       return localServer.shouldInterceptRequest(request.getUrl());
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
     @Override
     public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
+
+      if (url.toLowerCase().contains("clear/sessions")) {
+        return createEmptyResource();
+      }
+
       return localServer.shouldInterceptRequest(Uri.parse(url));
+    }
+
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    @Override
+    public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+        // Track downloads through URL overloads
+        try {
+          JSONObject json = new JSONObject();
+          json.put("url", request.getUrl());
+          this.engine.sendEvent(json);
+        } catch (JSONException exception) {
+          Log.d(TAG, "JSON Exception found " + exception.getMessage());
+        }
+        return true;
+    }
+
+    @TargetApi(Build.VERSION_CODES.KITKAT)
+    @Override
+    public boolean shouldOverrideUrlLoading(WebView view, String url) {
+        // Track downloads through URL overloads
+        try {
+          JSONObject json = new JSONObject();
+          json.put("url", url);
+          this.engine.sendEvent(json);
+        } catch (JSONException exception) {
+          Log.d(TAG, "JSON Exception found " + exception.getMessage());
+        }
+        return true;
     }
 
     @Override
@@ -139,14 +198,7 @@ public class IonicWebViewEngine extends SystemWebViewEngine {
       view.loadUrl("javascript:(function() { " +
               "window.WEBVIEW_SERVER_URL = '" + CDV_LOCAL_SERVER + "'" +
               "})()");
-    }
-    
-    @Override
-    public void onLoadResource(WebView view, String url) {
-      Log.d(TAG, "Loading resource!: " + url);
-      super.onLoadResource(view, url);
-    }
-      
+    } 
   }
 
   public void setServerBasePath(String path) {
