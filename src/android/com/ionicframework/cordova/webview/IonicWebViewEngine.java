@@ -136,8 +136,8 @@ public class IonicWebViewEngine extends SystemWebViewEngine {
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-
-      if (request.getUrl().toString().toLowerCase().contains("clear/sessions")) {
+      String url = request.getUrl().toString().toLowerCase();
+      if (url.contains("public.tableau.com") && url.contains("clear/sessions")) {
         return createEmptyResource();
       }
       return localServer.shouldInterceptRequest(request.getUrl());
@@ -146,8 +146,8 @@ public class IonicWebViewEngine extends SystemWebViewEngine {
     @TargetApi(Build.VERSION_CODES.KITKAT)
     @Override
     public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
-
-      if (url.toLowerCase().contains("clear/sessions")) {
+      url = url.toLowerCase();
+      if (url.contains("public.tableau.com") && url.contains("clear/sessions")) {
         return createEmptyResource();
       }
 
