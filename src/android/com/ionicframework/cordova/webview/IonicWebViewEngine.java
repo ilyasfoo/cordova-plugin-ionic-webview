@@ -146,8 +146,8 @@ public class IonicWebViewEngine extends SystemWebViewEngine {
     @TargetApi(Build.VERSION_CODES.KITKAT)
     @Override
     public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
-      url = url.toLowerCase();
-      if (url.contains("public.tableau.com") && url.contains("clear/sessions")) {
+      String _url = url.toLowerCase();
+      if (_url.contains("public.tableau.com") && _url.contains("clear/sessions")) {
         return createEmptyResource();
       }
 
