@@ -108,6 +108,8 @@
 @property (nonatomic, strong) NSString *userAgentCreds;
 @property (nonatomic, assign) BOOL internalConnectionsOnly;
 @property (nonatomic, readwrite) NSString *CDV_LOCAL_SERVER;
+@property (nonatomic, copy) NSString *networkCallbackId;
+
 @end
 
 // expose private configuration value required for background operation
@@ -124,6 +126,7 @@
 @implementation CDVWKWebViewEngine
 
 @synthesize engineWebView = _engineWebView;
+@synthesize networkCallbackId;
 
 - (instancetype)initWithFrame:(CGRect)frame
 {
@@ -269,6 +272,7 @@
 
     CDVWKWeakScriptMessageHandler *weakScriptMessageHandler = [[CDVWKWeakScriptMessageHandler alloc] initWithScriptMessageHandler:self];
 
+    // Setup WKUserContentController instance for injecting user script
     WKUserContentController* userContentController = [[WKUserContentController alloc] init];
     [userContentController addScriptMessageHandler:weakScriptMessageHandler name:CDV_BRIDGE_NAME];
     [userContentController addScriptMessageHandler:weakScriptMessageHandler name:CDV_IONIC_STOP_SCROLL];
@@ -772,6 +776,11 @@ static void * KVOContext = &KVOContext;
         }
     }
 
+    // Detect if navigating to an A HREF attribute clicked by user
+    if (navigationAction.navigationType == WKNavigationTypeLinkActivated) {
+       [self sendEvent:[url absoluteString]];
+    }
+
     if (!anyPluginsResponded) {
         /*
          * Handle all other types of urls (tel:, sms:), and requests to load a url in the main webview.
@@ -847,6 +856,25 @@ static void * KVOContext = &KVOContext;
     if (restart) {
         [self startServer];
     }
+}
+
+// Sends event out to JS through plugin
+-(void)sendEvent:(NSString *) url
+{
+    if (self.networkCallbackId != (id)[NSNull null] && self.networkCallbackId.length > 0 ) {
+        NSMutableDictionary* message = [NSMutableDictionary dictionaryWithCapacity:4];
+
+        [message setObject:url forKey:@"url"];
+        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:message];
+        [pluginResult setKeepCallbackAsBool:YES];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:self.networkCallbackId];
+    }
+    
+}
+
+-(void)networkRequestCallback:(CDVInvokedUrlCommand*)command
+{
+    self.networkCallbackId = command.callbackId;
 }
 
 -(void) internalConnectionsGetHandlerForPath:(NSString*)directoryPath {
