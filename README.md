@@ -14,7 +14,7 @@ this.platform.ready().then(() => {
 });
 ```
 
-**However**, please do note that I've made some modification for android to block some of the ajax calls by Tableau for prematurely clearing session. Could've been made better by rejecting navigation out. Refer to [this commit](https://github.com/ilyasfoo/cordova-plugin-ionic-webview/commit/2adc216c5d74cc8fb7bf21ad27d974a8e236e6f6)
+**However**, please do note that I've made some modification for android to block some of the ajax calls by Tableau for prematurely clearing session. Could've been made better by rejecting navigation out. To remove, refer to [this commit](https://github.com/ilyasfoo/cordova-plugin-ionic-webview/commit/2adc216c5d74cc8fb7bf21ad27d974a8e236e6f6) and [this commit](https://github.com/ilyasfoo/cordova-plugin-ionic-webview/commit/fa1162a0e7f31f45524a571e052ffccbb8ca964b)
 
 
 <!--
