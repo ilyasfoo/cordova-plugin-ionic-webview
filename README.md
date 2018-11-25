@@ -9,7 +9,7 @@ Example usage is as follows:
 ```ts
 this.platform.ready().then(() => {
     window.Ionic.WebView.networkRequestCallback(( { url } ) => {
-        console.log('Received callback for the url: ${url}');
+        console.log(`Received callback for the url: ${url}`);
     });
 });
 ```
