@@ -1,3 +1,22 @@
+Whats in this fork
+--------
+
+My client's project required to download files from a protected iframe context, which is not possible without listening to network/navigation events.
+Thus I've added the function `networkRequestCallback` to listen for those events which triggers when we're downloading a file through an `<a href="">` element.
+
+Example usage is as follows:
+------
+```ts
+this.platform.ready().then(() => {
+    window.Ionic.WebView.networkRequestCallback(( { url } ) => {
+        console.log('Received callback for the url: ${url}');
+    });
+});
+```
+
+**However**, please do note that I've made some modification for android to block some of the ajax calls by Tableau for prematurely clearing session. Could've been made better by rejecting navigation out. Refer to [this commit](https://github.com/ilyasfoo/cordova-plugin-ionic-webview/commit/2adc216c5d74cc8fb7bf21ad27d974a8e236e6f6)
+
+
 <!--
 # license: Licensed to the Apache Software Foundation (ASF) under one
 #         or more contributor license agreements.  See the NOTICE file
