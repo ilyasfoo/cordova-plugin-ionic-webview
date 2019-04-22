@@ -95,7 +95,17 @@ Whether to try to keep the server running when the app is backgrounded. Note: th
 
 The hostname the server will bind to. There aren't a lot of other valid options, but some prefer binding to "127.0.0.1"
 
-#### WKInternalConnectionsOnly (New in 2.2.0)
+#### WKSuspendInBackground
+
+ ```xml
+<preference name="WKSuspendInBackground" value="false" />
+```
+
+Default value is `true` (suspend).
+
+Set to false to stop WKWebView suspending in background too eagerly.
+
+#### KeyboardAppearanceDark
 
 ```xml
 <preference name="WKInternalConnectionsOnly" value="true" />
